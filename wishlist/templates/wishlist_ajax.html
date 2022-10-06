@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        document.getElementById("formdata").addEventListener("submit", function(e){
+        e.preventDefault();
+    
+        nama_barang = document.getElementById("nama_barang").value;
+        harga_barang = document.getElementById("harga_barang").value
+        deskripsi = document.getElementById("deskripsi").value
+        
+    const formData = new FormData();
+    //console.log(name);
+    formData.append('nama_barang', nama_barang);
+    formData.append('harga_barang', harga_barang);
+    formData.append('deskripsi', deskripsi);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    console.log(formData);
+    fetch('{% url "wishlist" %}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wishlist</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  </head>
+  <body>
+    <h5>Nama: </h5>
+    <p><b>{{nama}}</b></p>
+
+    <table>
+        <tr>
+        <th>Nama Barang</th>
+        <th>Harga Barang</th>
+        <th>Deskripsi</th>
+        </tr>
+        {% comment %} Tambahkan data di bawah baris ini {% endcomment %}
+        {% for barang in list_barang %}
+            <tr>
+                <th>{{barang.nama_barang}}</th>
+                <th>{{barang.harga_barang}}</th>
+                <th>{{barang.deskripsi}}</th>
+            </tr>
+        {% endfor %}
+    </table>
+    <h5>Sesi terakhir login: {{ last_login }}</h5>
+
+    <form action="" method="POST" role="form" id="#form">
+        {% csrf_token %}
+        <label for="title"><h5>Nama Barang: </h5></label><br>
+        <input type="text" id="nama_barang" name="nama_barang" maxlength="30"><br>
+        <label for="title"><h5>Harga Barang:: </h5></label><br>
+        <input type="text" id="harga_barang" name="harga_barang" maxlength="30"><br>
+        <label for="description"><h5>Deskripsi:</h5></label><br>
+        <textarea id="deskripsi" name="deskripsi" maxlength="150"></textarea><br>
+        <div class="center">
+        <input type="submit" name="button" class="btn button-main add submit-button" id="submit-button" value="Submit">
+        </div>
+      </form>
+      
+    <button><a href="{% url 'wishlist:logout' %}">Logout</a></button>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+  </body>
+</html>
+
+{% endblock content %}

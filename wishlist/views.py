@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.core import serializers
 from django.shortcuts import render
 import datetime
+from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from wishlist.models import BarangWishlist
@@ -23,6 +24,31 @@ def show_wishlist(request):
     'last_login': request.COOKIES['last_login']
     }
     return render(request, "wishlist.html", context)
+
+@login_required(login_url='/wishlist/login/')
+def show_wishlist_ajax(request):
+    data_barang_wishlist = BarangWishlist.objects.all()
+    if request.method == "POST":
+        create_data(request)
+
+    context = {
+        'list_barang': data_barang_wishlist,
+        'nama': 'Mochammad Iqbal',
+        'last_login': request.COOKIES['last_login']
+        }
+    
+    return render(request, "wishlist_ajax.html", context)
+
+def create_data(request):
+    if request.method == "POST":
+        nama_barang = request.POST['nama_barang']
+        harga_barang = request.POST['harga_barang']
+        deskripsi = request.POST['deskripsi']
+
+        new_data = BarangWishlist(nama_barang=nama_barang, harga_barang=harga_barang, deskripsi=deskripsi)
+        new_data.save()
+        data = {'nama_barang':nama_barang, 'harga_barang':harga_barang, 'deskripsi':deskripsi }
+        return JsonResponse(data, safe=False)
 
 def show_wishlist_xml(request):
     data = BarangWishlist.objects.all()
